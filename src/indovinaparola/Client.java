@@ -39,6 +39,7 @@ public class Client {
             log("Client : " + ex.getMessage());
         }catch(IOException ex){
             log("Client : " + ex.getMessage());
+            //p
         }
         
     }

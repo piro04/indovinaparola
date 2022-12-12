@@ -12,29 +12,30 @@ public class IndovinaParola {
 
     private String parola = "paguro";
     private String parolaNascosta = nascondiParola(parola);
-    private boolean playState = true;
+    private boolean playState = false;
     Server server;
 
     public IndovinaParola() {
     }
 
-    public void check(String str) {
+    public void check(String str, ClientHandler c) {
         if (!playState) {
             if (str.equalsIgnoreCase("start")) {
                 Start();
+                c.forwardToAllClients(parolaNascosta);
                 return;
             }
             return;
         }
 
         if (str.equalsIgnoreCase("jolly")) {
-            //Deve essere inviato a tutti i client-->("Parola: " + parola + "\nGioco terminato, digitare 'Start' per iniziare una nuova partita");
+            c.forwardToAllClients("Parola: " + parola + "\nGioco terminato, digitare 'Start' per iniziare una nuova partita");
             playState = false;
             return;
         }
 
         if (str.equalsIgnoreCase(parola)) {
-            //Deve essere inviato a tutti i client-->("Parola indovinata! Digitare 'Start' per iniziare una nuova partita");
+            c.forwardToAllClients("Parola indovinata! Digitare 'Start' per iniziare una nuova partita");
             playState = false;
             return;
         }
@@ -47,12 +48,11 @@ public class IndovinaParola {
                 temp += '#';
             }
         }
-        //Deve essere inviato a tutti i client-->("Parola: " + temp);
+        c.forwardToAllClients("Parola: " + temp);
     }
 
     private void Start() {
         playState = true;
-        //la parola nascosta(#####) va fatta vedere a tutti i giocatori
     }
     
     private String nascondiParola(String parola){

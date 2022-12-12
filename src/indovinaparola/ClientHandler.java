@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package indovinaparola;
 
 import java.io.*;
@@ -17,79 +16,74 @@ import java.util.logging.Logger;
 import java.util.Date;
 import java.util.List;
 
-
-public class ClientHandler implements Runnable{
+public class ClientHandler implements Runnable {
 
     final Socket socket;
     final Scanner scan;
     String name;
     boolean isLosggedIn;
-    
+
     private DataInputStream input;
     private DataOutputStream output;
+        
+    IndovinaParola gioco;
+
     
-    public ClientHandler(Socket socket, String name){
+
+    public ClientHandler(Socket socket, String name, IndovinaParola g) {
         this.socket = socket;
         scan = new Scanner(System.in);
         this.name = name;
         isLosggedIn = true;
         
-        try{
+
+        try {
             input = new DataInputStream(socket.getInputStream());
             output = new DataOutputStream(socket.getOutputStream());
-            
-        }catch(IOException ex){
+
+        } catch (IOException ex) {
             log("ClientHander : " + ex.getMessage());
         }
+        this.gioco = g;
     }
+
     @Override
     public void run() {
         String received;
         write(output, "Your name : " + name);
-        
-        String temp="";
+
+        String temp = "";
         List<ClientHandler> clients = new ArrayList<>(Server.getClients());
         int size = clients.size();
-        if ( size > 1) {
-            for (int i = 0; i < size-1; i++) {
-            temp += clients.get(i).name;
+        if (size > 1) {
+            for (int i = 0; i < size - 1; i++) {
+                temp += clients.get(i).name;
             }
             write(output, "Active clients:\n" + temp);
         }
-        
-        while(true){
+
+        while (true) {
             received = read();
-            if(received.equalsIgnoreCase(Constants.LOGOUT)){
+            if (received.equalsIgnoreCase(Constants.LOGOUT)) {
                 this.isLosggedIn = false;
                 closeSocket();
                 closeStreams();
                 break;
             }
-            
-            forwardToClient(received);
+            gioco.check(received, this);
         }
         closeStreams();
     }
     
-    private void forwardToClient(String received){
-        // username # message
-        Date date = new Date();
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm");
-        StringTokenizer tokenizer = new StringTokenizer(received, "#");
-        String recipient = tokenizer.nextToken().trim();
-        String message = "[" + formatter.format(date) + "]" + tokenizer.nextToken().trim();
-        
+    public void forwardToAllClients(String message){        
         for(ClientHandler c : Server.getClients()){
-            if(c.isLosggedIn && c.name.equals(recipient)){
-                write(c.output,  recipient + " : " + message);
-                log(name + " --> " + recipient + " : " + message);
-                break;
+            if(c.isLosggedIn){
+                write(c.output, message);
             }
-        }
-        
+        }  
     }
-    
-    private String read(){
+
+    private String read() {
         String line = "";
         try {
             line = input.readUTF();
@@ -98,15 +92,19 @@ public class ClientHandler implements Runnable{
         }
         return line;
     }
-    
-    private void write(DataOutputStream output , String message){
+
+    public void write(String message) {
+        write(output, message);
+    }
+
+    private void write(DataOutputStream output, String message) {
         try {
             output.writeUTF(message);
         } catch (IOException ex) {
             log("write : " + ex.getMessage());
         }
     }
-    
+
     private void closeStreams() {
         try {
             this.input.close();
@@ -115,16 +113,16 @@ public class ClientHandler implements Runnable{
             log("closeStreams : " + ex.getMessage());
         }
     }
-  
-    private void closeSocket(){
-        try{
+
+    private void closeSocket() {
+        try {
             socket.close();
-        }catch(IOException ex){
+        } catch (IOException ex) {
             log("closeSocket : " + ex.getMessage());
         }
     }
-   
-    private void log(String msg){
+
+    private void log(String msg) {
         System.out.println(msg);
     }
 }
