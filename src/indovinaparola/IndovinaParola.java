@@ -42,12 +42,19 @@ public class IndovinaParola {
 
         String temp = "";
         for (int i = 0; i < parola.length(); i++) {
+            
+            if (i >= str.length()) {
+                temp += '#';
+                continue;
+            }
+            
             if (parola.charAt(i) == str.charAt(i)) {
                 temp += parola.charAt(i);
             } else {
                 temp += '#';
             }
         }
+        c.forwardToAllClients(c.name + ": " +str);
         c.forwardToAllClients("Parola: " + temp);
     }
 
