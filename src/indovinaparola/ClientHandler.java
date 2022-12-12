@@ -27,7 +27,7 @@ public class ClientHandler implements Runnable {
     private DataOutputStream output;
         
     IndovinaParola gioco;
-
+    int tentativi;
     
 
     public ClientHandler(Socket socket, String name, IndovinaParola g) {
@@ -35,6 +35,7 @@ public class ClientHandler implements Runnable {
         scan = new Scanner(System.in);
         this.name = name;
         isLosggedIn = true;
+        tentativi = 0;
         
 
         try {
