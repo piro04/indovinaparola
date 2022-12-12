@@ -4,8 +4,10 @@
  */
 package indovinaparola;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,11 +23,32 @@ import java.util.logging.Logger;
 public class IndovinaParola {
 
     private String parola = "paguro";
+    ArrayList<String> array= new ArrayList<>;
     private String parolaNascosta = nascondiParola(parola);
     private boolean playState = false;
     Server server;
 
     public IndovinaParola() {
+        public IndovinaParola() throws FileNotFoundException, IOException {
+        FileReader f;
+        f = new FileReader("parole.txt");
+
+        BufferedReader b;
+        b = new BufferedReader(f);
+
+        String s;
+
+        while (true) {
+            s = b.readLine();
+            if (s == null) {
+                break;
+            }
+            tpar.add(s);
+        }
+        
+        int random =  (int) (0 +  (Math.random() * 650000));
+        parola = tpar.get(random);
+
     }
 
     public void check(String str, ClientHandler c) {
