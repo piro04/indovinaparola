@@ -22,36 +22,17 @@ import java.util.logging.Logger;
  */
 public class IndovinaParola {
 
-    private String parola = "paguro";
-    ArrayList<String> array= new ArrayList<>;
-    private String parolaNascosta = nascondiParola(parola);
+    private String parola;
+    ArrayList<String> tpar = new ArrayList<>();
+    private String parolaNascosta;
     private boolean playState = false;
     Server server;
 
     public IndovinaParola() {
-        public IndovinaParola() throws FileNotFoundException, IOException {
-        FileReader f;
-        f = new FileReader("parole.txt");
-
-        BufferedReader b;
-        b = new BufferedReader(f);
-
-        String s;
-
-        while (true) {
-            s = b.readLine();
-            if (s == null) {
-                break;
-            }
-            tpar.add(s);
-        }
-        
-        int random =  (int) (0 +  (Math.random() * 650000));
-        parola = tpar.get(random);
 
     }
 
-    public void check(String str, ClientHandler c) {
+    public void check(String str, ClientHandler c) throws IOException {
         if (!playState) {
             if (str.equalsIgnoreCase("start")) {
                 Start();
@@ -68,36 +49,48 @@ public class IndovinaParola {
         }
 
         c.tentativi++;
-        System.out.println("tentativi " + c.name + ": " + c.tentativi);
         if (str.equalsIgnoreCase(parola)) {
-            c.forwardToAllClients("Parola indovinata! Digitare 'Start' per iniziare una nuova partita");
+            c.forwardToAllClients(c.name + " ha indovinato in " + c.tentativi + " tentativi! Digitare 'Start' per iniziare una nuova partita");
             playState = false;
             controllaPunteggio(c.name, c.tentativi);
             c.forwardToAllClients(visualizzaClassifica());
             return;
         }
 
-        String temp = "";
         for (int i = 0; i < parola.length(); i++) {
-
             if (i >= str.length()) {
-                temp += '#';
                 continue;
             }
 
             if (parola.charAt(i) == str.charAt(i)) {
-                temp += parola.charAt(i);
-            } else {
-                temp += '#';
+                parolaNascosta = parolaNascosta.substring(0, i) + parola.charAt(i) + parolaNascosta.substring(i + 1);
             }
         }
         c.forwardToAllClients(c.name + ": " + str);
-        c.forwardToAllClients("Parola: " + temp);
+        c.forwardToAllClients("Parola: " + parolaNascosta);
     }
 
-    private void Start() {
+    private void Start() throws FileNotFoundException, IOException {
         playState = true;
-        
+        FileReader f;
+        f = new FileReader("parole.txt");
+
+        BufferedReader b;
+        b = new BufferedReader(f);
+
+        String s;
+
+        while (true) {
+            s = b.readLine();
+            if (s == null) {
+                break;
+            }
+            tpar.add(s);
+        }
+
+        int random = (int) (0 + (Math.random() * 650000));
+        parola = tpar.get(random);
+        parolaNascosta = nascondiParola(parola);
     }
 
     private String nascondiParola(String parola) {
@@ -204,10 +197,10 @@ public class IndovinaParola {
         } catch (FileNotFoundException ex) {
             Logger.getLogger(IndovinaParola.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         String temp = "Classifica:\n";
         for (int i = 0; i < classifica.size(); i++) {
-            temp += i+1 + ")" + classifica.get(i).get(0) + " " + classifica.get(i).get(1) + "\n";
+            temp += i + 1 + ")" + classifica.get(i).get(0) + " " + classifica.get(i).get(1) + "\n";
         }
         return temp;
     }
